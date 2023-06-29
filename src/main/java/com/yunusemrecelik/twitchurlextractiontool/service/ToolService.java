@@ -34,7 +34,7 @@ public class ToolService {
     private GetAccessTokenResponseModel getAccessToken(String name) {
         Gson gson = new Gson();
         RequestSpecification requestSpecification = given();
-        requestSpecification.header(CONTENT_TYPE_VALUE, CONTENT_TYPE_VALUE);
+//        requestSpecification.header(CONTENT_TYPE_VALUE, CONTENT_TYPE_VALUE);
         requestSpecification.header(ACCEPT, "*/*");
         requestSpecification.header("Client-ID", this.clientId);
 
