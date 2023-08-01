@@ -1,4 +1,4 @@
-FROM openjdk-17
+FROM openjdk:17
 VOLUME /tpm
 COPY target/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
