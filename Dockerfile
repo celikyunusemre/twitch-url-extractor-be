@@ -1,5 +1,5 @@
 FROM openjdk:17
 VOLUME /tpm
-COPY target/*.jar app.jar
+COPY TwitchUrlExtractionTool.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app.jar"]
 EXPOSE 8080
