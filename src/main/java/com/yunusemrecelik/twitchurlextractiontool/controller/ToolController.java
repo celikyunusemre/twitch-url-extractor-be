@@ -1,6 +1,7 @@
 package com.yunusemrecelik.twitchurlextractiontool.controller;
 
-import com.yunusemrecelik.twitchurlextractiontool.exception.ApiRequestException;
+import com.yunusemrecelik.twitchurlextractiontool.exception.EmptyChannelNameException;
+import com.yunusemrecelik.twitchurlextractiontool.exception.EmptyUrlException;
 import com.yunusemrecelik.twitchurlextractiontool.service.ToolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,9 +26,13 @@ public class ToolController {
     @GetMapping()
     @CrossOrigin(origins = "*")
     public Object getUrl(@RequestParam String name) {
+        if (name.isEmpty() || name.isBlank()) {
+            throw new EmptyChannelNameException("Channel name is required");
+        }
+
         List<HashMap<String, String>> streamUrls = toolService.getStream(name);
         if (streamUrls.isEmpty()) {
-            throw new ApiRequestException("Channel is offline or invalid channel name");
+            throw new EmptyUrlException("Channel is offline or invalid channel name");
         } else {
             return streamUrls;
         }
