@@ -34,6 +34,14 @@ public class TwitchService implements ITwitchService {
     @Value("${twitch.api.clientSecret}")
     private String twitchClientSecret;
 
+    @PostConstruct
+    public void postConstruct() {
+        // Accessing values using @Value annotations
+        System.out.println("Twitch API URL: " + twitchApiUrl);
+        System.out.println("Twitch Client ID: " + twitchClientId);
+        System.out.println("Twitch Client Secret: " + twitchClientSecret);
+    }
+
     @Override
     public TwitchOAuthResponse getToken() {
         String path = "/oauth2/token";

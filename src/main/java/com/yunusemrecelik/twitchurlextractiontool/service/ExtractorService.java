@@ -7,6 +7,7 @@ import com.yunusemrecelik.twitchurlextractiontool.model.requests.GQLAccessTokenR
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.GQLAccessTokenResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -30,6 +31,13 @@ public class ExtractorService implements IExtractorService {
     private String twitchGQLUrl;
     @Value("${twitch.gql.clientId}")
     private String twitchGQLClientId;
+
+    @PostConstruct
+    public void postConstruct() {
+        // Accessing values using @Value annotations
+        System.out.println("Twitch GQL URL: " + twitchGQLUrl);
+        System.out.println("Twitch GQL ID: " + twitchGQLClientId);
+    }
 
     private GQLAccessTokenResponse getAccessToken(String name) {
         RequestSpecification requestSpecification = given();
