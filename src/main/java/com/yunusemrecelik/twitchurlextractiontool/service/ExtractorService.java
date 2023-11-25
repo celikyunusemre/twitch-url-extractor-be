@@ -7,7 +7,9 @@ import com.yunusemrecelik.twitchurlextractiontool.model.requests.GQLAccessTokenR
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.GQLAccessTokenResponse;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,11 +26,10 @@ public class ExtractorService implements IExtractorService {
     private final String CONTENT_TYPE_VALUE = "application/json";
     private final String ACCEPT = "Accept";
     private final Gson gson = new Gson();
-    @Value("${tool.twitch.gql.url}")
+    @Value("${twitch.gql.url}")
     private String twitchGQLUrl;
-    @Value("${tool.twitch.gql.client_id}")
+    @Value("${twitch.gql.clientId}")
     private String twitchGQLClientId;
-
 
     private GQLAccessTokenResponse getAccessToken(String name) {
         RequestSpecification requestSpecification = given();

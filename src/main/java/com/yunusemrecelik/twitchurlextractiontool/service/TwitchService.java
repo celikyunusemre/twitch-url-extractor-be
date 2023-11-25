@@ -11,6 +11,7 @@ import com.yunusemrecelik.twitchurlextractiontool.util.TokenProvider;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +27,11 @@ public class TwitchService implements ITwitchService {
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_TYPE_VALUE = "application/json";
     private final String ACCEPT = "Accept";
-    @Value("${tool.twitch.api.url}")
+    @Value("${twitch.api.url}")
     private String twitchApiUrl;
-    @Value("${tool.twitch.client_id}")
+    @Value("${twitch.api.clientId}")
     private String twitchClientId;
-    @Value("${tool.twitch.client_secret}")
+    @Value("${twitch.api.clientSecret}")
     private String twitchClientSecret;
 
     @Override
