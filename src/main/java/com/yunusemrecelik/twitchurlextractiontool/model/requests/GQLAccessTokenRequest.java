@@ -1,4 +1,4 @@
-package com.yunusemrecelik.twitchurlextractiontool.model;
+package com.yunusemrecelik.twitchurlextractiontool.model.requests;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetAccessTokenRequestModel {
+public class GQLAccessTokenRequest {
     private String operationName;
     private Map<String, Map<String, Object>> extensions;
     private Map<String, Object> variables;

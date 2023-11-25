@@ -28,4 +28,24 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
     }
+
+    @ExceptionHandler(UnexpectedErrorException.class)
+    public final ResponseEntity<ErrorResponse> handleUnexpectedErrorException(
+            UnexpectedErrorException ex
+    ) {
+        return new ResponseEntity<>(
+                new ErrorResponse(ex.getLocalizedMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
+    }
+
+    @ExceptionHandler(NonExistUserException.class)
+    public final ResponseEntity<ErrorResponse> handleNonExistUserException(
+            NonExistUserException ex
+    ) {
+        return new ResponseEntity<>(
+                new ErrorResponse(ex.getLocalizedMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 }

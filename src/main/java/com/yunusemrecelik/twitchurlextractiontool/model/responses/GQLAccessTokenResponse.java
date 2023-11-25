@@ -1,4 +1,4 @@
-package com.yunusemrecelik.twitchurlextractiontool.model;
+package com.yunusemrecelik.twitchurlextractiontool.model.responses;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.util.HashMap;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetAccessTokenResponseModel {
+public class GQLAccessTokenResponse {
     private HashMap<String, HashMap<String, String>> data;
     private HashMap<String, String> extensions;
 }
