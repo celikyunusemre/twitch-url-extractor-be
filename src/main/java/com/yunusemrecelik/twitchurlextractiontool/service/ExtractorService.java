@@ -8,9 +8,7 @@ import com.yunusemrecelik.twitchurlextractiontool.model.responses.GQLAccessToken
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -88,7 +86,7 @@ public class ExtractorService implements IExtractorService {
                     .queryParam("sig", gqlAccessTokenResponse.getData().get("streamPlaybackAccessToken").get("signature"))
                     .queryParam("allow_source", true)
                     .queryParam("allow_audio_only", true)
-                    .get("https://usher.ttvnw.net/api/channel/hls/"+name+".m3u8");
+                    .get("https://usher.ttvnw.net/api/channel/hls/" + name + ".m3u8");
             return response.getBody().asString();
         } catch (Exception e) {
             throw new UnexpectedErrorException("An error accorded while trying to Get Playlists: " + e.getMessage());
@@ -98,7 +96,7 @@ public class ExtractorService implements IExtractorService {
     private List<HashMap<String, String>> parsePlaylist(String playList) {
         List<HashMap<String, String>> parsedPlayList = new ArrayList<>();
         String[] lines = playList.split("\n");
-        for (int i = 4; i < lines.length ; i += 3) {
+        for (int i = 4; i < lines.length; i += 3) {
             HashMap<String, String> properties = new HashMap<>();
             properties.put("quality", lines[i - 2].split("NAME=")[1].split("\"")[1]);
             properties.put("resolution", (lines[i - 1].indexOf("RESOLUTION") != -1 ? lines[i - 1].split("RESOLUTION=")[1].split(",")[0] : null));

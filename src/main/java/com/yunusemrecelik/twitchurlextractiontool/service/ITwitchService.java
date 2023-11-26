@@ -11,5 +11,6 @@ public interface ITwitchService {
     boolean isStreamerLive(String name);
 
     boolean isUserExists(String name);
+
     List<TwitchSearchUserResponse.SearchUserData> getUserDetails(String name);
 }

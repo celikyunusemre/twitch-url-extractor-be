@@ -3,11 +3,11 @@ package com.yunusemrecelik.twitchurlextractiontool.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.yunusemrecelik.twitchurlextractiontool.exception.UnexpectedErrorException;
+import com.yunusemrecelik.twitchurlextractiontool.model.TokenEntry;
 import com.yunusemrecelik.twitchurlextractiontool.model.requests.TwitchOAuthRequest;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchOAuthResponse;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchStreamResponse;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchUserResponse;
-import com.yunusemrecelik.twitchurlextractiontool.util.TokenProvider;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.yunusemrecelik.twitchurlextractiontool.util.TokenCache.getCachedToken;
+import static com.yunusemrecelik.twitchurlextractiontool.util.TokenCache.tokenCache;
 import static io.restassured.RestAssured.given;
 
 @Service
@@ -27,12 +28,21 @@ public class TwitchService implements ITwitchService {
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_TYPE_VALUE = "application/json";
     private final String ACCEPT = "Accept";
-    @Value("${twitch.api.url}")
-    private String twitchApiUrl;
-    @Value("${twitch.api.clientId}")
-    private String twitchClientId;
-    @Value("${twitch.api.clientSecret}")
-    private String twitchClientSecret;
+    //    @Value("${twitch.api.url}")
+    private final String twitchApiUrl;
+    //    @Value("${twitch.api.clientId}")
+    private final String twitchClientId;
+    //    @Value("${twitch.api.clientSecret}")
+    private final String twitchClientSecret;
+
+    public TwitchService(
+            @Value("${twitch.api.url}") String twitchApiUrl,
+            @Value("${twitch.api.clientId}") String twitchClientId,
+            @Value("${twitch.api.clientSecret}") String twitchClientSecret) {
+        this.twitchApiUrl = twitchApiUrl;
+        this.twitchClientId = twitchClientId;
+        this.twitchClientSecret = twitchClientSecret;
+    }
 
     @PostConstruct
     public void postConstruct() {
@@ -70,7 +80,17 @@ public class TwitchService implements ITwitchService {
         String query = "?user_login=" + name;
 
         RequestSpecification requestSpecification = given();
-        String token = getCachedToken("twitchToken", new TokenProvider());
+        String token = "";
+        try {
+            token = getCachedToken("twitchToken");
+        } catch (UnexpectedErrorException e) {
+            if (e.getMessage().contains("No cached token found")) {
+                TwitchOAuthResponse response = getToken();
+                token = response.getAccess_token();
+                tokenCache.put("twitchToken", new TokenEntry(token, response.getToken_type(), response.getExpires_in()));
+            }
+        }
+
         requestSpecification.header("Authorization", "Bearer " + token);
         requestSpecification.header("Client-Id", twitchClientId);
         requestSpecification.header(CONTENT_TYPE, CONTENT_TYPE_VALUE);
@@ -94,7 +114,16 @@ public class TwitchService implements ITwitchService {
         String query = "?login=" + name;
 
         RequestSpecification requestSpecification = given();
-        String token = getCachedToken("twitchToken", new TokenProvider());
+        String token = "";
+        try {
+            token = getCachedToken("twitchToken");
+        } catch (UnexpectedErrorException e) {
+            if (e.getMessage().contains("No cached token found")) {
+                TwitchOAuthResponse response = getToken();
+                token = response.getAccess_token();
+                tokenCache.put("twitchToken", new TokenEntry(token, response.getToken_type(), response.getExpires_in()));
+            }
+        }
         requestSpecification.header("Authorization", "Bearer " + token);
         requestSpecification.header("Client-Id", twitchClientId);
         requestSpecification.header(CONTENT_TYPE, CONTENT_TYPE_VALUE);
