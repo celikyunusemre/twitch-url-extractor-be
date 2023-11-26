@@ -11,8 +11,16 @@ import static io.restassured.RestAssured.given;
 
 public class TokenCache {
 
+    /**
+     * Cached tokens.
+     */
     public static final Map<String, TokenEntry> tokenCache = new HashMap<>();
 
+    /**
+     * Gets the cached token.
+     * @param key the map's key to get cached token
+     * @return string the token
+     */
     public static String getCachedToken(String key) {
         TokenEntry entry = tokenCache.get(key);
 
@@ -22,6 +30,11 @@ public class TokenCache {
         throw new NullPointerException("No cached token found");
     }
 
+    /**
+     * Checks if the token is valid
+     * @param token the twitch token
+     * @return boolean
+     */
     private static boolean isValidToken(String token) {
         // Perform token validation logic here
         // For example, make a request to the token validation endpoint

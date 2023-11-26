@@ -1,5 +1,6 @@
 package com.yunusemrecelik.twitchurlextractiontool.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.yunusemrecelik.twitchurlextractiontool.exception.DataNotFoundException;
@@ -15,6 +16,7 @@ import io.restassured.specification.RequestSpecification;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.yunusemrecelik.twitchurlextractiontool.util.TokenCache.getCachedToken;
@@ -68,7 +70,7 @@ public class TwitchService implements ITwitchService {
     }
 
     @Override
-    public List<TwitchSearchStreamResponse.SearchStreamData> getStreamDetails(String name) {
+    public TwitchSearchStreamResponse getStreamDetails(String name) {
         String path = "/helix/streams";
         String query = "?user_login=" + name;
 
@@ -89,24 +91,26 @@ public class TwitchService implements ITwitchService {
         requestSpecification.header(CONTENT_TYPE, CONTENT_TYPE_VALUE);
         requestSpecification.header(ACCEPT, CONTENT_TYPE_VALUE);
 
-        try {
-            Response response = requestSpecification.get(twitchApiUrl + path + query);
-            TwitchSearchStreamResponse responseModel = new ObjectMapper()
-                    .readValue(response.getBody().asString(), TwitchSearchStreamResponse.class);
-
-            return responseModel.getData();
-        } catch (Exception e) {
-            throw new DataNotFoundException("An error accorded while trying to check Is Streamer Live");
+        Response response = requestSpecification.get(twitchApiUrl + path + query);
+        List<LinkedHashMap<String, Object>> responseData = response.getBody().jsonPath().getList("data");
+        if (responseData.isEmpty()) {
+            throw new DataNotFoundException(name + " is not live");
         }
+        ObjectMapper objectMapper = new ObjectMapper();
+        LinkedHashMap<String, Object> data = responseData.get(0);
+        TwitchSearchStreamResponse responseModel = objectMapper.convertValue(data, TwitchSearchStreamResponse.class);
+
+        return responseModel;
+
     }
 
     @Override
     public boolean isStreamerLive(String name) {
-        return !getStreamDetails(name).isEmpty();
+        return !getStreamDetails(name).getGame_name().isEmpty();
     }
 
     @Override
-    public List<TwitchSearchUserResponse.SearchUserData> getUserDetails(String name) {
+    public TwitchSearchUserResponse getUserDetails(String name) {
         String path = "/helix/users";
         String query = "?login=" + name;
 
@@ -126,19 +130,20 @@ public class TwitchService implements ITwitchService {
         requestSpecification.header(CONTENT_TYPE, CONTENT_TYPE_VALUE);
         requestSpecification.header(ACCEPT, CONTENT_TYPE_VALUE);
 
-        try {
-            Response response = requestSpecification.get(twitchApiUrl + path + query);
-            TwitchSearchUserResponse responseModel = new ObjectMapper()
-                    .readValue(response.getBody().asString(), TwitchSearchUserResponse.class);
-
-            return responseModel.getData();
-        } catch (Exception e) {
-            throw new DataNotFoundException("An error accorded while trying to Get User Details");
+        Response response = requestSpecification.get(twitchApiUrl + path + query);
+        List<LinkedHashMap<String, Object>> responseData = response.getBody().jsonPath().getList("data");
+        if (responseData.isEmpty()) {
+            throw new DataNotFoundException(name + " doesn't exists");
         }
+        ObjectMapper objectMapper = new ObjectMapper();
+        LinkedHashMap<String, Object> data = responseData.get(0);
+        TwitchSearchUserResponse responseModel = objectMapper.convertValue(data, TwitchSearchUserResponse.class);
+
+        return responseModel;
     }
 
     @Override
     public boolean isUserExists(String name) {
-        return !getUserDetails(name).isEmpty();
+        return getUserDetails(name).getLogin().contains(name);
     }
 }

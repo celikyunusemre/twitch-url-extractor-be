@@ -7,12 +7,12 @@ import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchUs
 import java.util.List;
 
 public interface ITwitchService {
-    TwitchOAuthResponse getToken();
-
     boolean isStreamerLive(String name);
 
     boolean isUserExists(String name);
-    List<TwitchSearchStreamResponse.SearchStreamData> getStreamDetails(String name);
+    TwitchOAuthResponse getToken();
 
-    List<TwitchSearchUserResponse.SearchUserData> getUserDetails(String name);
+    TwitchSearchStreamResponse getStreamDetails(String name);
+
+    TwitchSearchUserResponse getUserDetails(String name);
 }

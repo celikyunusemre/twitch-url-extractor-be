@@ -29,7 +29,7 @@ public class TwitchUserConroller {
 
     @CrossOrigin(origins = "*")
     @GetMapping("/{name}")
-    public ResponseEntity<List<TwitchSearchUserResponse.SearchUserData>> getStreamer(@PathVariable String name) {
+    public ResponseEntity<TwitchSearchUserResponse> getStreamer(@PathVariable String name) {
         name = name.toLowerCase(Locale.ENGLISH);
         checkUserExists(name);
 

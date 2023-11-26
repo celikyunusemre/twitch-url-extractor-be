@@ -45,7 +45,7 @@ public class ExtractionController {
 
     @CrossOrigin(origins = "*")
     @GetMapping("/{name}/details")
-    public ResponseEntity<List<TwitchSearchStreamResponse.SearchStreamData>> getStreamDetails(@PathVariable String name) {
+    public ResponseEntity<TwitchSearchStreamResponse> getStreamDetails(@PathVariable String name) {
         name = name.toLowerCase(Locale.ENGLISH);
         checkUserExists(name);
         checkStreamerIsLive(name);

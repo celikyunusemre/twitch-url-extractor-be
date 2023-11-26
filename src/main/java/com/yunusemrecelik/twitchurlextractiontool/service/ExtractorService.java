@@ -20,22 +20,31 @@ import static io.restassured.RestAssured.given;
 @Service
 public class ExtractorService implements IExtractorService {
 
-    private final String CONTENT_TYPE = "Content-Type";
+    /**
+     *  Content Type value -> application/json by default
+     */
     private final String CONTENT_TYPE_VALUE = "application/json";
+    /**
+     * Header for endpoint requests
+     */
     private final String ACCEPT = "Accept";
     private final Gson gson = new Gson();
+    /**
+     * Twitch GQL Url
+     */
     @Value("${twitch.gql.url}")
     private String twitchGQLUrl;
+    /**
+     * Cliend ID of Twitch QGL
+     */
     @Value("${twitch.gql.clientId}")
     private String twitchGQLClientId;
 
-    @PostConstruct
-    public void postConstruct() {
-        // Accessing values using @Value annotations
-        System.out.println("Twitch GQL URL: " + twitchGQLUrl);
-        System.out.println("Twitch GQL ID: " + twitchGQLClientId);
-    }
 
+    /**
+     * @param name the streamer name
+     * @return GQLAccessTokenResponse returns response model of gql access request
+     */
     private GQLAccessTokenResponse getAccessToken(String name) {
         RequestSpecification requestSpecification = given();
         requestSpecification.header(ACCEPT, "*/*");
@@ -75,7 +84,7 @@ public class ExtractorService implements IExtractorService {
 
     public String getPlaylist(String name, GQLAccessTokenResponse gqlAccessTokenResponse) {
         RequestSpecification requestSpecification = given();
-        requestSpecification.header(CONTENT_TYPE, CONTENT_TYPE_VALUE);
+        requestSpecification.header("Content-Type", CONTENT_TYPE_VALUE);
         requestSpecification.header(ACCEPT, CONTENT_TYPE_VALUE);
 
         try {
