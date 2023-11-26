@@ -1,6 +1,6 @@
 package com.yunusemrecelik.twitchurlextractiontool.util;
 
-import com.yunusemrecelik.twitchurlextractiontool.exception.UnexpectedErrorException;
+import com.yunusemrecelik.twitchurlextractiontool.exception.GetTokenException;
 import com.yunusemrecelik.twitchurlextractiontool.model.TokenEntry;
 import io.restassured.response.Response;
 
@@ -19,17 +19,7 @@ public class TokenCache {
         if (entry != null && isValidToken(entry.token)) {
             return entry.token;
         }
-        throw new UnexpectedErrorException("No cached token found");
-//        try {
-//            // Cache miss or expired entry, fetch the new token and update the cache
-//            String newToken = tokenProvider.fetchToken();
-//            String newTokenType = tokenProvider.fetchTokenType();
-//            String newTokenExpire = tokenProvider.fetchTokenExpire();
-//            tokenCache.put(key, new TokenEntry(newToken, newTokenType, newTokenExpire));
-//            return newToken;
-//        } catch (Exception e) {
-//            throw new UnexpectedErrorException("An error occurred while getting Cached Token: " + e.getMessage());
-//        }
+        throw new NullPointerException("No cached token found");
     }
 
     private static boolean isValidToken(String token) {
@@ -43,7 +33,7 @@ public class TokenCache {
             return response.statusCode() == 200;
         } catch (Exception e) {
             // Handle exception or log the error
-            return false;
+            throw new GetTokenException("An error accorded while checking Is Token Valid");
         }
     }
 

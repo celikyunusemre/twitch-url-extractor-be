@@ -2,7 +2,8 @@ package com.yunusemrecelik.twitchurlextractiontool.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.yunusemrecelik.twitchurlextractiontool.exception.UnexpectedErrorException;
+import com.yunusemrecelik.twitchurlextractiontool.exception.DataNotFoundException;
+import com.yunusemrecelik.twitchurlextractiontool.exception.GetTokenException;
 import com.yunusemrecelik.twitchurlextractiontool.model.TokenEntry;
 import com.yunusemrecelik.twitchurlextractiontool.model.requests.TwitchOAuthRequest;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchOAuthResponse;
@@ -11,7 +12,6 @@ import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchUs
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,11 +28,8 @@ public class TwitchService implements ITwitchService {
     private final String CONTENT_TYPE = "Content-Type";
     private final String CONTENT_TYPE_VALUE = "application/json";
     private final String ACCEPT = "Accept";
-    //    @Value("${twitch.api.url}")
     private final String twitchApiUrl;
-    //    @Value("${twitch.api.clientId}")
     private final String twitchClientId;
-    //    @Value("${twitch.api.clientSecret}")
     private final String twitchClientSecret;
 
     public TwitchService(
@@ -42,14 +39,6 @@ public class TwitchService implements ITwitchService {
         this.twitchApiUrl = twitchApiUrl;
         this.twitchClientId = twitchClientId;
         this.twitchClientSecret = twitchClientSecret;
-    }
-
-    @PostConstruct
-    public void postConstruct() {
-        // Accessing values using @Value annotations
-        System.out.println("Twitch API URL: " + twitchApiUrl);
-        System.out.println("Twitch Client ID: " + twitchClientId);
-        System.out.println("Twitch Client Secret: " + twitchClientSecret);
     }
 
     @Override
@@ -69,13 +58,17 @@ public class TwitchService implements ITwitchService {
 
         Response request = requestSpecification.post(twitchApiUrl + path);
         JsonPath responseBody = request.getBody().jsonPath();
-        return TwitchOAuthResponse.builder().access_token(responseBody.get("access_token"))
-                .expires_in(responseBody.get("expires_in"))
-                .token_type(responseBody.get("token_type")).build();
+        try {
+            return TwitchOAuthResponse.builder().access_token(responseBody.get("access_token"))
+                    .expires_in(responseBody.get("expires_in"))
+                    .token_type(responseBody.get("token_type")).build();
+        } catch (Exception e) {
+            throw new GetTokenException("An error accorded when getting token from Twitch");
+        }
     }
 
     @Override
-    public boolean isStreamerLive(String name) {
+    public List<TwitchSearchStreamResponse.SearchStreamData> getStreamDetails(String name) {
         String path = "/helix/streams";
         String query = "?user_login=" + name;
 
@@ -83,7 +76,7 @@ public class TwitchService implements ITwitchService {
         String token = "";
         try {
             token = getCachedToken("twitchToken");
-        } catch (UnexpectedErrorException e) {
+        } catch (NullPointerException e) {
             if (e.getMessage().contains("No cached token found")) {
                 TwitchOAuthResponse response = getToken();
                 token = response.getAccess_token();
@@ -101,11 +94,15 @@ public class TwitchService implements ITwitchService {
             TwitchSearchStreamResponse responseModel = new ObjectMapper()
                     .readValue(response.getBody().asString(), TwitchSearchStreamResponse.class);
 
-            List<TwitchSearchStreamResponse.SearchStreamData> searchStreamData = responseModel.getData();
-            return !searchStreamData.isEmpty();
+            return responseModel.getData();
         } catch (Exception e) {
-            throw new UnexpectedErrorException("An error accorded while trying to check Is Streamer Live: " + e.getLocalizedMessage());
+            throw new DataNotFoundException("An error accorded while trying to check Is Streamer Live");
         }
+    }
+
+    @Override
+    public boolean isStreamerLive(String name) {
+        return !getStreamDetails(name).isEmpty();
     }
 
     @Override
@@ -117,7 +114,7 @@ public class TwitchService implements ITwitchService {
         String token = "";
         try {
             token = getCachedToken("twitchToken");
-        } catch (UnexpectedErrorException e) {
+        } catch (NullPointerException e) {
             if (e.getMessage().contains("No cached token found")) {
                 TwitchOAuthResponse response = getToken();
                 token = response.getAccess_token();
@@ -136,7 +133,7 @@ public class TwitchService implements ITwitchService {
 
             return responseModel.getData();
         } catch (Exception e) {
-            throw new UnexpectedErrorException("An error accorded while trying to Get User Details: " + e.getLocalizedMessage());
+            throw new DataNotFoundException("An error accorded while trying to Get User Details");
         }
     }
 

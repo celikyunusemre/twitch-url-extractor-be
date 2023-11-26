@@ -1,16 +1,14 @@
 package com.yunusemrecelik.twitchurlextractiontool.controller;
 
-import com.yunusemrecelik.twitchurlextractiontool.exception.EmptyChannelNameException;
-import com.yunusemrecelik.twitchurlextractiontool.exception.EmptyUrlException;
-import com.yunusemrecelik.twitchurlextractiontool.exception.NonExistUserException;
-import com.yunusemrecelik.twitchurlextractiontool.exception.UnexpectedErrorException;
+import com.yunusemrecelik.twitchurlextractiontool.exception.DataNotFoundException;
+import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchStreamResponse;
 import com.yunusemrecelik.twitchurlextractiontool.service.ExtractorService;
 import com.yunusemrecelik.twitchurlextractiontool.service.TwitchService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +16,8 @@ import java.util.Locale;
 
 
 @RestController
+@CrossOrigin(origins = "*")
+@RequestMapping("/api/search/stream")
 public class ExtractionController {
 
     @Autowired
@@ -26,33 +26,40 @@ public class ExtractionController {
     @Autowired
     private TwitchService twitchService;
 
-    @GetMapping()
-    @CrossOrigin(origins = "*")
-    public Object getUrl(@RequestParam String name) {
+    private final Logger logger = LoggerFactory.getLogger(ExtractionController.class);
 
-        if (name.isEmpty() || name.isBlank()) {
-            throw new EmptyChannelNameException("Channel name is required");
-        }
-
-        name = name.toLowerCase(Locale.ENGLISH);
-
+    private void checkUserExists(String name) {
+        logger.info("Searching {} on Twitch...", name);
         if (!twitchService.isUserExists(name)) {
-            throw new NonExistUserException("This streamer does not exist on Twitch.tv");
+            throw new NullPointerException("User " + name + " does not exist on Twitch.");
         }
+        logger.info("{} is found on Twitch!", name);
+    }
 
+    private void checkStreamerIsLive(String name) {
+        logger.info("Checking if {} is live...", name);
         if (!twitchService.isStreamerLive(name)) {
-            throw new EmptyUrlException("Channel is offline");
+            throw new DataNotFoundException(name + " is not online right now");
         }
+        logger.info("{} is live!", name);
+    }
 
-        try {
-            List<HashMap<String, String>> streamUrls = extractorService.getStreamUrls(name);
-            if (streamUrls.isEmpty()) {
-                throw new UnexpectedErrorException("Failed to get stream urls!!");
-            }
-            return streamUrls;
-        } catch (Exception e) {
-            throw new UnexpectedErrorException("An error accorded while trying to get Stream URLs: " + e.getMessage());
-        }
+    @GetMapping("/{name}/details")
+    public ResponseEntity<List<TwitchSearchStreamResponse.SearchStreamData>> getStreamDetails(@PathVariable String name) {
+        name = name.toLowerCase(Locale.ENGLISH);
+        checkUserExists(name);
+        checkStreamerIsLive(name);
 
+        return ResponseEntity.ok(twitchService.getStreamDetails(name));
+    }
+
+    @GetMapping("/{name}")
+    public ResponseEntity<List<HashMap<String, String>>> getStreamUrls(@PathVariable String name) {
+        name = name.toLowerCase(Locale.ENGLISH);
+        checkUserExists(name);
+        checkStreamerIsLive(name);
+
+        return ResponseEntity.ok(extractorService.getStreamUrls(name));
     }
 }
+

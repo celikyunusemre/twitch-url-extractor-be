@@ -2,7 +2,6 @@ package com.yunusemrecelik.twitchurlextractiontool.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import com.yunusemrecelik.twitchurlextractiontool.exception.UnexpectedErrorException;
 import com.yunusemrecelik.twitchurlextractiontool.model.requests.GQLAccessTokenRequest;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.GQLAccessTokenResponse;
 import io.restassured.response.Response;
@@ -70,7 +69,7 @@ public class ExtractorService implements IExtractorService {
             return new ObjectMapper()
                     .readValue(response.getBody().asString(), GQLAccessTokenResponse.class);
         } catch (Exception e) {
-            throw new UnexpectedErrorException("An error accorded while trying to get GQL Access Token: " + e.getMessage());
+            throw new NullPointerException("An error accorded while trying to get GQL Access Token: " + e.getMessage());
         }
     }
 
@@ -89,7 +88,7 @@ public class ExtractorService implements IExtractorService {
                     .get("https://usher.ttvnw.net/api/channel/hls/" + name + ".m3u8");
             return response.getBody().asString();
         } catch (Exception e) {
-            throw new UnexpectedErrorException("An error accorded while trying to Get Playlists: " + e.getMessage());
+            throw new NullPointerException("An error accorded while trying to Get Playlists: " + e.getMessage());
         }
     }
 
