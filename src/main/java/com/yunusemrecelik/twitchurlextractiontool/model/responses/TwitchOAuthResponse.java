@@ -9,6 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class TwitchOAuthResponse {
     private String access_token;
-    private String expires_in;
+    private int expires_in;
     private String token_type;
 }

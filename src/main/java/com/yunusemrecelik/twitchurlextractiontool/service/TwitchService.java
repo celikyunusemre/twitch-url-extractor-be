@@ -1,11 +1,9 @@
 package com.yunusemrecelik.twitchurlextractiontool.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.yunusemrecelik.twitchurlextractiontool.exception.DataNotFoundException;
 import com.yunusemrecelik.twitchurlextractiontool.exception.GetTokenException;
-import com.yunusemrecelik.twitchurlextractiontool.model.TokenEntry;
 import com.yunusemrecelik.twitchurlextractiontool.model.requests.TwitchOAuthRequest;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchOAuthResponse;
 import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchStreamResponse;
@@ -13,6 +11,8 @@ import com.yunusemrecelik.twitchurlextractiontool.model.responses.TwitchSearchUs
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +34,8 @@ public class TwitchService implements ITwitchService {
     private final String twitchClientId;
     private final String twitchClientSecret;
 
+    private final Logger logger = LoggerFactory.getLogger(TwitchService.class);
+
     public TwitchService(
             @Value("${twitch.api.url}") String twitchApiUrl,
             @Value("${twitch.api.clientId}") String twitchClientId,
@@ -45,6 +47,7 @@ public class TwitchService implements ITwitchService {
 
     @Override
     public TwitchOAuthResponse getToken() {
+        logger.info("Generating new token...");
         String path = "/oauth2/token";
         TwitchOAuthRequest requestBody = TwitchOAuthRequest.builder()
                 .client_id(twitchClientId)
@@ -58,7 +61,7 @@ public class TwitchService implements ITwitchService {
         String jsonBody = gson.toJson(requestBody);
         requestSpecification.body(jsonBody);
 
-        Response request = requestSpecification.post(twitchApiUrl + path);
+        Response request = requestSpecification.post("https://id.twitch.tv" + path);
         JsonPath responseBody = request.getBody().jsonPath();
         try {
             return TwitchOAuthResponse.builder().access_token(responseBody.get("access_token"))
@@ -82,7 +85,7 @@ public class TwitchService implements ITwitchService {
             if (e.getMessage().contains("No cached token found")) {
                 TwitchOAuthResponse response = getToken();
                 token = response.getAccess_token();
-                tokenCache.put("twitchToken", new TokenEntry(token, response.getToken_type(), response.getExpires_in()));
+                tokenCache.put("twitchToken", new TwitchOAuthResponse(token, response.getExpires_in(), response.getToken_type()));
             }
         }
 
@@ -98,9 +101,8 @@ public class TwitchService implements ITwitchService {
         }
         ObjectMapper objectMapper = new ObjectMapper();
         LinkedHashMap<String, Object> data = responseData.get(0);
-        TwitchSearchStreamResponse responseModel = objectMapper.convertValue(data, TwitchSearchStreamResponse.class);
 
-        return responseModel;
+        return objectMapper.convertValue(data, TwitchSearchStreamResponse.class);
 
     }
 
@@ -122,7 +124,7 @@ public class TwitchService implements ITwitchService {
             if (e.getMessage().contains("No cached token found")) {
                 TwitchOAuthResponse response = getToken();
                 token = response.getAccess_token();
-                tokenCache.put("twitchToken", new TokenEntry(token, response.getToken_type(), response.getExpires_in()));
+                tokenCache.put("twitchToken", new TwitchOAuthResponse(token, response.getExpires_in(), response.getToken_type()));
             }
         }
         requestSpecification.header("Authorization", "Bearer " + token);
@@ -137,9 +139,8 @@ public class TwitchService implements ITwitchService {
         }
         ObjectMapper objectMapper = new ObjectMapper();
         LinkedHashMap<String, Object> data = responseData.get(0);
-        TwitchSearchUserResponse responseModel = objectMapper.convertValue(data, TwitchSearchUserResponse.class);
 
-        return responseModel;
+        return objectMapper.convertValue(data, TwitchSearchUserResponse.class);
     }
 
     @Override
