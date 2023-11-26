@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Locale;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/search/user")
 public class TwitchUserConroller {
@@ -28,6 +27,7 @@ public class TwitchUserConroller {
         logger.info("{} is found on Twitch!", name);
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/{name}")
     public ResponseEntity<List<TwitchSearchUserResponse.SearchUserData>> getStreamer(@PathVariable String name) {
         name = name.toLowerCase(Locale.ENGLISH);

@@ -16,7 +16,6 @@ import java.util.Locale;
 
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/api/search/stream")
 public class ExtractionController {
 
@@ -44,6 +43,7 @@ public class ExtractionController {
         logger.info("{} is live!", name);
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/{name}/details")
     public ResponseEntity<List<TwitchSearchStreamResponse.SearchStreamData>> getStreamDetails(@PathVariable String name) {
         name = name.toLowerCase(Locale.ENGLISH);
@@ -53,6 +53,7 @@ public class ExtractionController {
         return ResponseEntity.ok(twitchService.getStreamDetails(name));
     }
 
+    @CrossOrigin(origins = "*")
     @GetMapping("/{name}")
     public ResponseEntity<List<HashMap<String, String>>> getStreamUrls(@PathVariable String name) {
         name = name.toLowerCase(Locale.ENGLISH);
