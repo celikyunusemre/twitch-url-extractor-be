@@ -1,5 +1,6 @@
 package com.yunusemrecelik.twitchurlextractiontool.model.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.util.HashMap;
@@ -9,7 +10,8 @@ import java.util.HashMap;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GQLAccessTokenResponse {
-    private HashMap<String, HashMap<String, String>> data;
-    private HashMap<String, String> extensions;
+    private GQLAccessTokenData data;
+    private HashMap<String, Object> extensions;
 }

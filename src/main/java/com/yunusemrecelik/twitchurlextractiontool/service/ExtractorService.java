@@ -91,8 +91,8 @@ public class ExtractorService implements IExtractorService {
         try {
             Response response = requestSpecification
                     .queryParam("client_id", twitchGQLClientId)
-                    .queryParam("token", gqlAccessTokenResponse.getData().get("streamPlaybackAccessToken").get("value"))
-                    .queryParam("sig", gqlAccessTokenResponse.getData().get("streamPlaybackAccessToken").get("signature"))
+                    .queryParam("token", gqlAccessTokenResponse.getData().getStreamPlaybackAccessToken().getValue())
+                    .queryParam("sig", gqlAccessTokenResponse.getData().getStreamPlaybackAccessToken().getSignature())
                     .queryParam("allow_source", true)
                     .queryParam("allow_audio_only", true)
                     .get("https://usher.ttvnw.net/api/channel/hls/" + name + ".m3u8");
