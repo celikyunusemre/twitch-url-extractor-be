@@ -52,7 +52,7 @@ public class ExtractorService implements IExtractorService {
 
         Map<String, Object> persistedQuery = new HashMap<>();
         persistedQuery.put("version", 1);
-        persistedQuery.put("sha256Hash", "0828119ded1c13477966434e15800ff57ddacf13ba1911c129dc2200705b0712");
+        persistedQuery.put("sha256Hash", "ed230aa1e33e07eebb8928504583da78a5173989fadfb1ac94be06a04f3cdbe9");
 
         Map<String, Map<String, Object>> extensions = new HashMap<>();
         extensions.put("persistedQuery", persistedQuery);
@@ -63,6 +63,7 @@ public class ExtractorService implements IExtractorService {
         variables.put("isVod", false);
         variables.put("vodID", "");
         variables.put("playerType", "embed");
+        variables.put("platform", "site");
 
         GQLAccessTokenRequest requestModel = GQLAccessTokenRequest.builder()
                 .operationName("PlaybackAccessToken")
